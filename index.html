@@ -97,42 +97,25 @@ async function startScanner(){
     codeReader = new ZXingBrowser.BrowserMultiFormatReader();
 
     await codeReader.decodeFromVideoDevice(
-      undefined,
-      video,
+      null,
+      "video",
       (result,error)=>{
 
-       if(result){
+      if (result) {
 
     let data = result.text.trim();
 
-    data = data.replace(/\D/g,"").slice(-20);
+    data = data.replace(/\D/g, "").slice(-20);
 
-    document.getElementById("packs").value =
-    data.substring(0,5);
+    document.getElementById("packs").value = data.substring(0, 5);
 
-    document.getElementById("wo").value =
-    data.substring(5,16);
+    document.getElementById("wo").value = data.substring(5, 16);
 
-    document.getElementById("pallet").value =
-    data.substring(16,19);
+    document.getElementById("pallet").value = data.substring(16, 19);
 
-    status.innerHTML="✅ تم قراءة الباركود";
+    status.innerHTML = "✅ تم قراءة الباركود";
 
 }
-
-data = data.replace(/\D/g,"").slice(-20);          document.getElementById("packs").value =
-          data.substring(0,5);
-
-          document.getElementById("wo").value =
-          data.substring(5,16);
-
-          document.getElementById("pallet").value =
-          data.substring(16,19);
-
-          status.innerHTML="✅ تم قراءة الباركود";
-
-        }
-
       });
 
   }catch(e){
