@@ -7,8 +7,7 @@
 
 <title>FG Tracker</title>
 
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
-
+<script src="https://unpkg.com/html5-qrcode"></script>
 <style>
 
 body{
@@ -59,8 +58,7 @@ text-align:center;
 
 <h2>FG Tracker</h2>
 
-<video id="video" autoplay playsinline></video>
-
+<div id="reader" style="width:100%;"></div>
 <div id="status">
 اضغط Scan لبدء القراءة
 </div>
@@ -89,29 +87,58 @@ let codeReader = null;
 
 async function startScanner() {
 
+  const html5QrCode = new Html5Qrcode("reader");
+
   try {
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
+    await html5QrCode.start(
+
+      {
         facingMode: "environment"
+      },
+
+      {
+        fps: 10,
+        qrbox: {
+          width: 300,
+          height: 300
+        }
+      },
+
+      function(decodedText) {
+
+        html5QrCode.stop();
+
+        let data = decodedText.trim();
+
+        data = data.replace(/\D/g,"").slice(-20);
+
+        document.getElementById("packs").value =
+        data.substring(0,5);
+
+        document.getElementById("wo").value =
+        data.substring(5,16);
+
+        document.getElementById("pallet").value =
+        data.substring(16,19);
+                document.getElementById("status").innerHTML =
+        "✅ تم قراءة الباركود";
+
+      },
+
+      function(errorMessage) {
+        // تجاهل أخطاء البحث المستمرة
       }
-    });
 
-    document.getElementById("video").srcObject = stream;
-    await document.getElementById("video").play();
+    );
 
-document.getElementById("status").innerHTML = "📷 الكاميرا تعمل";
+  } catch (err) {
 
-    alert("الكاميرا اشتغلت");
-
-  } catch (e) {
-
-    alert(e.name + "\n" + e.message);
+    alert("تعذر تشغيل الكاميرا\n" + err);
 
   }
 
 }
-
   function saveData(){
 
   const wo = document.getElementById("wo").value;
