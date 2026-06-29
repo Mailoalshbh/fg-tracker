@@ -87,44 +87,27 @@ const status = document.getElementById("status");
 
 let codeReader = null;
 
-async function startScanner(){
+async function startScanner() {
 
-  try{
+  try {
 
-  if(codeReader){
-}
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment"
+      }
+    });
 
-    codeReader = new ZXingBrowser.BrowserMultiFormatReader();
+    document.getElementById("video").srcObject = stream;
 
-    await codeReader.decodeFromVideoDevice(
-      null,
-      "video",
-      (result,error)=>{
+    alert("الكاميرا اشتغلت");
 
-      if (result) {
+  } catch (e) {
 
-    let data = result.text.trim();
-
-    data = data.replace(/\D/g, "").slice(-20);
-
-    document.getElementById("packs").value = data.substring(0, 5);
-
-    document.getElementById("wo").value = data.substring(5, 16);
-
-    document.getElementById("pallet").value = data.substring(16, 19);
-
-    status.innerHTML = "✅ تم قراءة الباركود";
-
-}
-      });
-
-  }catch(e){
-
-    alert(e);
-
-    console.log(e);
+    alert(e.name + "\n" + e.message);
 
   }
+
+}
 
 }
   function saveData(){
