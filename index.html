@@ -91,9 +91,8 @@ async function startScanner(){
 
   try{
 
-    if(codeReader){
-      codeReader.reset();
-    }
+  if(codeReader){
+}
 
     codeReader = new ZXingBrowser.BrowserMultiFormatReader();
 
@@ -102,14 +101,26 @@ async function startScanner(){
       video,
       (result,error)=>{
 
-        if(result){
+       if(result){
 
-          codeReader.reset();
+    let data = result.text.trim();
 
-          let data = result.text.trim();
+    data = data.replace(/\D/g,"").slice(-20);
 
-data = data.replace(/\D/g,"");
-          document.getElementById("packs").value =
+    document.getElementById("packs").value =
+    data.substring(0,5);
+
+    document.getElementById("wo").value =
+    data.substring(5,16);
+
+    document.getElementById("pallet").value =
+    data.substring(16,19);
+
+    status.innerHTML="✅ تم قراءة الباركود";
+
+}
+
+data = data.replace(/\D/g,"").slice(-20);          document.getElementById("packs").value =
           data.substring(0,5);
 
           document.getElementById("wo").value =
