@@ -101,7 +101,14 @@ let controls = null;
 
     video.srcObject = stream;
 
-    await video.play();
+video.onloadedmetadata = async () => {
+    try {
+        await video.play();
+        status.innerHTML = "✅ الكاميرا اشتغلت";
+    } catch (e) {
+        alert(e);
+    }
+};
 
     status.innerHTML = "✅ الكاميرا اشتغلت";
 
