@@ -98,6 +98,9 @@ async function startScanner() {
     });
 
     document.getElementById("video").srcObject = stream;
+    await document.getElementById("video").play();
+
+document.getElementById("status").innerHTML = "📷 الكاميرا تعمل";
 
     alert("الكاميرا اشتغلت");
 
