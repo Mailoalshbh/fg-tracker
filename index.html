@@ -89,62 +89,25 @@ const status = document.getElementById("status");
 
 let reader = null;
 let controls = null;
-  async function startScanner(){
+  async function startScanner() {
 
-  status.innerHTML = "📷 جاري تشغيل الكاميرا...";
+  try {
 
-  if(reader){
-    reader.reset();
-  }
-
-  reader = new ZXing.BrowserMultiFormatReader();
-
-  try{
-
-    const devices = await reader.listVideoInputDevices();
-
-    const backCamera =
-      devices.find(d =>
-        d.label.toLowerCase().includes("back") ||
-        d.label.toLowerCase().includes("rear")
-      );
-
-    const deviceId = backCamera
-      ? backCamera.deviceId
-      : devices[0].deviceId;
-
-    reader.decodeFromVideoDevice(
-      deviceId,
-      video,
-      (result, err) => {
-
-        if(result){
-
-          let data = result.getText().trim();
-
-          data = data.replace(/\D/g,"").slice(-20);
-
-          document.getElementById("packs").value =
-            data.substring(0,5);
-
-          document.getElementById("wo").value =
-            data.substring(5,16);
-
-          document.getElementById("pallet").value =
-            data.substring(16,19);
-
-          status.innerHTML = "✅ تم قراءة الباركود";
-
-          reader.reset();
-
-        }
-
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "environment" }
       }
-    );
+    });
 
-  }catch(e){
+    video.srcObject = stream;
 
-    alert("خطأ في تشغيل الكاميرا:\n" + e);
+    await video.play();
+
+    status.innerHTML = "✅ الكاميرا اشتغلت";
+
+  } catch (e) {
+
+    alert(e.name + "\n" + e.message);
 
   }
 
