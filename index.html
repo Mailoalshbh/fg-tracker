@@ -7,14 +7,15 @@
 
 <title>FG Tracker</title>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+
 <style>
 
 body{
-font-family:Arial;
+font-family:Arial,sans-serif;
 background:#f5f5f5;
-padding:20px;
 margin:0;
+padding:20px;
 }
 
 h2{
@@ -25,26 +26,27 @@ video{
 width:100%;
 border:2px solid #999;
 border-radius:10px;
-margin-top:15px;
+background:#000;
 }
 
 input{
 width:100%;
 padding:12px;
-font-size:18px;
 margin-top:10px;
+font-size:18px;
 box-sizing:border-box;
 }
 
 button{
 width:100%;
 padding:15px;
-font-size:18px;
 margin-top:12px;
+font-size:18px;
+cursor:pointer;
 }
 
 #status{
-margin-top:15px;
+margin:15px 0;
 font-weight:bold;
 color:green;
 text-align:center;
@@ -58,7 +60,8 @@ text-align:center;
 
 <h2>FG Tracker</h2>
 
-<div id="reader" style="width:100%;"></div>
+<video id="video" autoplay playsinline muted></video>
+
 <div id="status">
 اضغط Scan لبدء القراءة
 </div>
@@ -69,7 +72,7 @@ text-align:center;
 
 <input id="packs" placeholder="Packs">
 
-<input id="reels" placeholder="Reels">
+<input id="reels" value="05" placeholder="Reels">
 
 <button onclick="startScanner()">
 📷 Scan Barcode
@@ -80,133 +83,141 @@ Save
 </button>
 
 <script>
+
+const video = document.getElementById("video");
 const status = document.getElementById("status");
 
+let reader = null;
+let controls = null;
+  async function startScanner(){
 
-async function startScanner() {
+  status.innerHTML = "📷 جاري تشغيل الكاميرا...";
 
-  const html5QrCode = new Html5Qrcode("reader");
+  if(reader){
+    reader.reset();
+  }
 
-  try {
+  reader = new ZXing.BrowserMultiFormatReader();
 
-    await html5QrCode.start(
+  try{
 
-{
-facingMode:"environment"
-},
+    const devices = await reader.listVideoInputDevices();
 
-{
-fps:10,
-qrbox:{width:300,height:300},
-formatsToSupport:[
-Html5QrcodeSupportedFormats.DATA_MATRIX,
-Html5QrcodeSupportedFormats.CODE_128
-]
-},
+    const backCamera =
+      devices.find(d =>
+        d.label.toLowerCase().includes("back") ||
+        d.label.toLowerCase().includes("rear")
+      );
 
-      {
-        fps: 10,
-        qrbox: {
-          width: 300,
-          height: 300
+    const deviceId = backCamera
+      ? backCamera.deviceId
+      : devices[0].deviceId;
+
+    reader.decodeFromVideoDevice(
+      deviceId,
+      video,
+      (result, err) => {
+
+        if(result){
+
+          let data = result.getText().trim();
+
+          data = data.replace(/\D/g,"").slice(-20);
+
+          document.getElementById("packs").value =
+            data.substring(0,5);
+
+          document.getElementById("wo").value =
+            data.substring(5,16);
+
+          document.getElementById("pallet").value =
+            data.substring(16,19);
+
+          status.innerHTML = "✅ تم قراءة الباركود";
+
+          reader.reset();
+
         }
-      },
 
-      function(decodedText) {
-
-        html5QrCode.stop();
-
-        let data = decodedText.trim();
-
-        data = data.replace(/\D/g,"").slice(-20);
-
-        document.getElementById("packs").value =
-        data.substring(0,5);
-
-        document.getElementById("wo").value =
-        data.substring(5,16);
-
-        document.getElementById("pallet").value =
-        data.substring(16,19);
-                document.getElementById("status").innerHTML =
-        "✅ تم قراءة الباركود";
-
-      },
-
-      function(errorMessage) {
-        // تجاهل أخطاء البحث المستمرة
       }
-
     );
 
-  } catch (err) {
+  }catch(e){
 
-    alert("تعذر تشغيل الكاميرا\n" + err);
+    alert("خطأ في تشغيل الكاميرا:\n" + e);
 
   }
 
 }
   function saveData(){
 
-  const wo = document.getElementById("wo").value;
-  const pallet = document.getElementById("pallet").value;
-  const packs = document.getElementById("packs").value;
-  const reels = document.getElementById("reels").value;
+  const wo = document.getElementById("wo").value.trim();
+  const pallet = document.getElementById("pallet").value.trim();
+  const packs = document.getElementById("packs").value.trim();
+  const reels = document.getElementById("reels").value.trim();
 
   if(!wo || !pallet || !packs){
+
     alert("اقرأ الباركود أولاً");
+
     return;
+
   }
 
   const noEntry = wo + "-" + pallet.padStart(3,"0");
 
-  fetch("https://script.google.com/macros/s/AKfycbxvJC89G5wcuWkJQT7PxcztVrWYAMV_BAe4bMr0qswV2QHbkmbo03pSWoWUzk3tEdRaCA/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbxvJC89G5wcuWkJQT7PxcztVrWYAMV_BAe4bMr0qswV2QHbkmbo03pSWoWUzk3tEdRaCA/exec",{
 
-  method: "POST",
+    method:"POST",
 
-  body: JSON.stringify({
+    headers:{
+      "Content-Type":"text/plain;charset=utf-8"
+    },
 
-    workOrder: wo,
+    body:JSON.stringify({
 
-    pallet: pallet,
+      workOrder:wo,
+      pallet:pallet,
+      noEntry:noEntry,
+      packs:packs,
+      reels:reels
 
-    packs: packs,
-
-    reels: reels
+    })
 
   })
 
-})
+  .then(r=>r.json())
 
-.then(r => r.json())
+  .then(r=>{
 
-.then(r => {
+    if(r.success){
 
-  if(r.success){
+      status.innerHTML="✅ تم الحفظ";
 
-    status.innerHTML="✅ تم الحفظ";
+      document.getElementById("wo").value="";
+      document.getElementById("pallet").value="";
+      document.getElementById("packs").value="";
+      document.getElementById("reels").value="05";
 
-    document.getElementById("wo").value="";
+    }else{
 
-    document.getElementById("pallet").value="";
+      alert("فشل الحفظ");
 
-    document.getElementById("packs").value="";
+    }
 
-    document.getElementById("reels").value="";
+  })
 
-  }else{
+  .catch(err=>{
 
-    alert(r.error);
+    console.log(err);
 
-  }
+    alert("خطأ أثناء الإرسال");
 
-})
-
-.catch(e=>alert(e));
+  });
 
 }
-
-</script>
+  </script>
 
 </body>
+
 </html>
