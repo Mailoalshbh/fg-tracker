@@ -101,8 +101,30 @@ alert("دخلت startScanner");
        disableFlip: true
       },
 
-      function(decodedText) {
+function(decodedText) {
 
+    // تجاهل الباركود العلوي
+    if (
+        !decodedText.startsWith("(123456789)") &&
+        !decodedText.startsWith("]C1")
+    ) {
+        return;
+    }
+
+    html5QrCode.stop();
+
+    let data = decodedText;
+
+    data = data.replace("(123456789)", "");
+    data = data.replace("]C1", "");
+    data = data.replace(/\D/g, "");
+
+    document.getElementById("packs").value = data.substring(0,5);
+    document.getElementById("wo").value = data.substring(5,16);
+    document.getElementById("pallet").value = data.substring(16,19);
+
+    status.innerHTML = "✅ تم قراءة الباركود الصحيح";
+}
 status.innerHTML = decodedText;
 html5QrCode.stop().then(() => {
     document.getElementById("reader").innerHTML = "";
