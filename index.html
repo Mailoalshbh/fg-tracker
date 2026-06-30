@@ -103,12 +103,15 @@ alert("دخلت startScanner");
 
       function(decodedText) {
 
-    alert(decodedText);
-
-    html5QrCode.stop();
-
-    let data = decodedText.replace(/\s/g, "").trim();
-
+status.innerHTML = decodedText;
+html5QrCode.stop().then(() => {
+    document.getElementById("reader").innerHTML = "";
+});
+let data = decodedText
+    .replace("]C1","")
+    .replace(/\//g,"")
+    .replace(/\s/g,"")
+    .trim();
         document.getElementById("packs").value =
           data.substring(0,5);
 
