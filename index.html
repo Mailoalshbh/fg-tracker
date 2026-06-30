@@ -8,9 +8,8 @@
 
 <title>FG Tracker</title>
 
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
-
-<style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
 
 body{
 font-family:Arial,sans-serif;
@@ -83,10 +82,8 @@ Save
 
 <script>
 
-const video=document.getElementById("video");
 const status=document.getElementById("status");
 
-let reader;
 async function startScanner() {
 
   status.innerHTML = "📷 جاري تشغيل الكاميرا...";
