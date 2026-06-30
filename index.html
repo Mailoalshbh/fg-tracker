@@ -60,8 +60,7 @@ color:green;
 
 <h2>FG Tracker</h2>
 
-<video id="video" autoplay playsinline muted></video>
-
+<div id="reader" style="width:100%;"></div>
 <div id="status">
 اضغط Scan
 </div>
@@ -88,47 +87,54 @@ const video=document.getElementById("video");
 const status=document.getElementById("status");
 
 let reader;
-  async function startScanner(){
+async function startScanner() {
 
-  status.innerHTML="📷 جاري تشغيل الكاميرا...";
+  status.innerHTML = "📷 جاري تشغيل الكاميرا...";
 
-  reader = new ZXingBrowser.BrowserMultiFormatReader();
+  const html5QrCode = new Html5Qrcode("reader");
 
-  try{
+  try {
 
-    await reader.decodeFromVideoDevice(
+    await html5QrCode.start(
 
-      undefined,
+      { facingMode: "environment" },
 
-      "video",
+      {
+        fps: 15,
+        qrbox: { width: 280, height: 180 },
+        aspectRatio: 1.777
+      },
 
-      (result,error)=>{
+      function(decodedText) {
 
-        if(result){
-          alert(result.getText());
-          let data=result.getText().trim();
+        html5QrCode.stop();
 
-          data=data.replace(/\D/g,"").slice(-20);
+        let data = decodedText.trim();
 
-          document.getElementById("packs").value=data.substring(0,5);
+        data = data.replace(/\D/g, "").slice(-20);
 
-          document.getElementById("wo").value=data.substring(5,16);
+        document.getElementById("packs").value =
+          data.substring(0,5);
 
-          document.getElementById("pallet").value=data.substring(16,19);
+        document.getElementById("wo").value =
+          data.substring(5,16);
 
-          status.innerHTML="✅ تم قراءة الباركود";
+        document.getElementById("pallet").value =
+          data.substring(16,19);
 
-          reader.reset();
+        status.innerHTML = "✅ تم قراءة الباركود";
 
-        }
+      },
 
+      function(errorMessage) {
+        // تجاهل أخطاء البحث أثناء المسح
       }
 
     );
 
-  }catch(e){
+  } catch (e) {
 
-    alert("Camera Error\n"+e);
+    alert("خطأ في تشغيل الكاميرا\n" + e);
 
   }
 
