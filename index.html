@@ -91,7 +91,7 @@ async function startScanner() {
   const html5QrCode = new Html5Qrcode("reader");
 
   try {
-
+alert("دخلت startScanner");
     await html5QrCode.start(
 
       { facingMode: "environment" },
@@ -103,9 +103,11 @@ async function startScanner() {
 
       function(decodedText) {
 
-        html5QrCode.stop();
+    alert(decodedText);
 
-        let data = decodedText.trim();
+    html5QrCode.stop();
+
+    let data = decodedText.trim();
 
         data = data.replace(/\D/g, "").slice(-20);
 
