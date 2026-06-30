@@ -7,8 +7,7 @@
 
 <title>FG Tracker</title>
 
-<script src="https://unpkg.com/@zxing/library@latest"></script>
-
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
 <style>
 
 body{
@@ -98,27 +97,36 @@ let controls = null;
         facingMode: { ideal: "environment" }
       }
     });
-
+reader = new ZXingBrowser.BrowserMultiFormatReader();
     video.srcObject = stream;
 
 video.onloadedmetadata = async () => {
-    try {
-        await video.play();
-        status.innerHTML = "✅ الكاميرا اشتغلت";
-    } catch (e) {
-        alert(e);
+
+  await video.play();
+
+  status.innerHTML = "📷 جاري قراءة الباركود...";
+
+  reader.decodeFromVideoElement(video, (result, err) => {
+
+    if (result) {
+
+      let data = result.getText();
+
+      data = data.replace(/\D/g, "").slice(-20);
+
+      document.getElementById("packs").value = data.substring(0,5);
+      document.getElementById("wo").value = data.substring(5,16);
+      document.getElementById("pallet").value = data.substring(16,19);
+
+      status.innerHTML = "✅ تم قراءة الباركود";
+
+      stream.getTracks().forEach(track => track.stop());
+
     }
+
+  });
+
 };
-
-    status.innerHTML = "✅ الكاميرا اشتغلت";
-
-  } catch (e) {
-
-    alert(e.name + "\n" + e.message);
-
-  }
-
-}
   function saveData(){
 
   const wo = document.getElementById("wo").value.trim();
