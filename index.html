@@ -90,54 +90,44 @@ let reader = null;
 let controls = null;
   async function startScanner() {
 
-  try {
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" }
-      }
-    });
-reader = new ZXingBrowser.BrowserMultiFormatReader();
-    video.srcObject = stream;
-
-video.onloadedmetadata = async () => {
-
-  await video.play();
-
-  status.innerHTML = "📷 جاري قراءة الباركود...";
-
-const controls = await reader.decodeFromVideoDevice(
-    undefined,
-    video,
-    (result, err) => {
-
-       
-    if (result) {
-
-      let data = result.getText();
-
-      data = data.replace(/\D/g, "").slice(-20);
-
-      document.getElementById("packs").value = data.substring(0,5);
-      document.getElementById("wo").value = data.substring(5,16);
-      document.getElementById("pallet").value = data.substring(16,19);
-
-      status.innerHTML = "✅ تم قراءة الباركود";
-
-      stream.getTracks().forEach(track => track.stop());
-
+    if (reader) {
+        reader.reset();
     }
 
-  });
+    reader = new ZXingBrowser.BrowserMultiFormatReader();
 
-};
+    status.innerHTML = "📷 جاري تشغيل الكاميرا...";
+
+    try {
+
+        await reader.decodeFromVideoDevice(
+            undefined,
+            "video",
+            (result, err) => {
+
+                if (result) {
+
+                    let data = result.getText().trim();
+
+                    data = data.replace(/\D/g, "").slice(-20);
+
+                    document.getElementById("packs").value = data.substring(0,5);
+                    document.getElementById("wo").value = data.substring(5,16);
+                    document.getElementById("pallet").value = data.substring(16,19);
+
+                    status.innerHTML = "✅ تم قراءة الباركود";
+
+                    reader.reset();
+                }
+
+            }
+        );
+
     } catch (e) {
 
-    alert(e);
+        alert("خطأ: " + e);
 
-    console.log(e);
-
-}
+    }
 
 }
   function saveData(){
