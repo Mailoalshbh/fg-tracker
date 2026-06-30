@@ -97,8 +97,8 @@ alert("دخلت startScanner");
       { facingMode: "environment" },
 
       {
-        fps: 15,
-       
+        fps: 60,
+       disableFlip: true
       },
 
       function(decodedText) {
@@ -107,9 +107,7 @@ alert("دخلت startScanner");
 
     html5QrCode.stop();
 
-    let data = decodedText.trim();
-
-        data = data.replace(/\D/g, "").slice(-20);
+    let data = decodedText.replace(/\s/g, "").trim();
 
         document.getElementById("packs").value =
           data.substring(0,5);
